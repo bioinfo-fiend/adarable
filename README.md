@@ -76,8 +76,8 @@ flowchart TD
     classDef done fill:#23aa62,stroke:#1b8a4f,color:#fff
     classDef todo fill:#24365c,stroke:#3d5a80,color:#fdf0d5
     classDef data fill:#ffd166,stroke:#e0b040,color:#11192e
-    class check,cat done
-    class fastqc,fastp,index,star,markdup,strand,redi,ann,aei,cohort,mqc,dash todo
+    class check,cat,index done
+    class fastqc,fastp,star,markdup,strand,redi,ann,aei,cohort,mqc,dash todo
     class sheet,fasta,known data
 ```
 
@@ -101,6 +101,22 @@ nextflow run main.nf -profile docker \
 ```
 
 Use `-profile apptainer` on HPC, and `-resume` to reuse finished steps.
+
+## References
+
+Nothing is stored in this repo. `--genome GRCh38` or `--genome GRCm39` reads public copies straight from the cloud:
+
+| | Source |
+|---|---|
+| Genome FASTA | [Broad public references](https://console.cloud.google.com/storage/browser/gcp-public-data--broad-references) (GENCODE primary assembly) |
+| Annotation | [GENCODE](https://www.gencodegenes.org/) 50 (human), M39 (mouse) |
+| SNPs | dbSNP 138 via Broad (human), Ensembl variation (mouse) |
+| Repeats | [UCSC RepeatMasker](https://genome.ucsc.edu/) (Alu; mouse B1/B2) |
+| Known editing sites | [REDIportal](http://srv00.recas.ba.infn.it/atlas/) (mouse lifted from mm10 to mm39) |
+
+Prepared files (uncompressed FASTA, STAR index, repeat and known-site BEDs) are built once into `--ref_cache` (default `./ref_cache`) and reused on later runs. Point several projects at one shared `--ref_cache` to build them only once.
+
+**Have your own references?** Copy [conf/local.example.config](conf/local.example.config) to `conf/local.config` (git-ignored), set your paths, and add `-c conf/local.config`. Anything you leave out falls back to the cloud copy. Single files can also be swapped with `--fasta`, `--gtf`, `--star_index`, `--dbsnp`, `--repeats`, `--rediportal`.
 
 ## Samplesheet
 
@@ -135,8 +151,8 @@ Provenance (parameters, tool versions, logs) is written next to the results, so 
 |---|---|---|
 | [00](docs/phases/00-overview.md) | Overview, samplesheet contract, design decisions | ✅ done |
 | [01](docs/phases/01-skeleton.md) | Skeleton: config, profiles, samplesheet check, FASTQ merge, provenance | ✅ done |
-| [02](docs/phases/02-references.md) | References for GRCh38 and GRCm39, STAR index, test slice | 🚧 next |
-| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, MultiQC | ⏳ planned |
+| [02](docs/phases/02-references.md) | References for GRCh38 and GRCm39, STAR index, test slice | ✅ done |
+| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, MultiQC | 🚧 next |
 | [04](docs/phases/04-align-dedup.md) | STAR 2-pass, MarkDuplicates, strandedness inference | ⏳ planned |
 | [05](docs/phases/05-editing-detection.md) | REDItools3 site detection | ⏳ planned |
 | [06](docs/phases/06-annotation.md) | Annotation against REDIportal, dbSNP, repeats | ⏳ planned |
