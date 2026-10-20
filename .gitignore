@@ -3,3 +3,5 @@ work/
 .nextflow/
 .nextflow.log*
 null/
+ref_cache/
+conf/local.config
