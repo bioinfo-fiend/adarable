@@ -65,3 +65,6 @@ results/
   multiqc/         multiqc_report.html
   dashboard.html
 ```
+
+## License
+[PolyForm Noncommercial 1.0.0](../../LICENSE.md): free for research, teaching, personal and other noncommercial use; commercial use is not permitted. This covers ADARable's own code only. Tools pulled in containers (STAR, REDItools, fastp, Picard, …) and reference data (REDIportal, dbSNP, GENCODE) keep their own licenses and terms.
