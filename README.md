@@ -90,7 +90,7 @@ Needs [Nextflow](https://www.nextflow.io/) ≥ 25.04 and Docker or Apptainer.
 ```bash
 git clone https://github.com/bioinfo-fiend/adarable.git && cd adarable
 
-# smoke test on bundled synthetic reads
+# smoke test on bundled real reads (tiny chr22 slice)
 nextflow run main.nf -profile test,docker
 
 # your data
@@ -134,8 +134,8 @@ Provenance (parameters, tool versions, logs) is written next to the results, so 
 | Phase | What | Status |
 |---|---|---|
 | [00](docs/phases/00-overview.md) | Overview, samplesheet contract, design decisions | ✅ done |
-| [01](docs/phases/01-skeleton.md) | Skeleton: config, profiles, samplesheet check, FASTQ merge, provenance | 🚧 in progress |
-| [02](docs/phases/02-references.md) | References for GRCh38 and GRCm39, STAR index, test slice | ⏳ planned |
+| [01](docs/phases/01-skeleton.md) | Skeleton: config, profiles, samplesheet check, FASTQ merge, provenance | ✅ done |
+| [02](docs/phases/02-references.md) | References for GRCh38 and GRCm39, STAR index, test slice | 🚧 next |
 | [03](docs/phases/03-qc-trim.md) | FastQC, fastp, MultiQC | ⏳ planned |
 | [04](docs/phases/04-align-dedup.md) | STAR 2-pass, MarkDuplicates, strandedness inference | ⏳ planned |
 | [05](docs/phases/05-editing-detection.md) | REDItools3 site detection | ⏳ planned |

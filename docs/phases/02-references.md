@@ -7,7 +7,14 @@ All reference paths come from config, keyed by `--genome`; nothing hard-coded in
 - `conf/genomes.config`: `params.genomes.GRCh38` and `params.genomes.GRCm39`, each with
   `fasta`, `gtf`, `star_index` (optional), `rediportal`, `dbsnp`, `repeats_bed` (Alu/SINE).
 - `STAR_GENOMEGENERATE` runs only when `star_index` is unset (`--sjdbOverhang` from `params.read_length - 1`).
-- Test slice for `-profile test`: GRCh38 chr22 subregion (~1 Mb), matching GTF/REDIportal/dbSNP/Alu subsets, built once by `assets/test/make_test_refs.sh` and committed (small) or fetched by URL.
+- Test references for `-profile test`, fetched by URL from nf-core/test-datasets `rnavar` (MIT): 40 kb chr22 slice `genome.fasta` (renumbered from 1), `genome.gtf`, `dbsnp_146.hg38.vcf.gz`, prebuilt `index/star/star.tar.gz`. Matches the test reads.
+- The slice is renumbered and nearly edit-free, so the real REDIportal file can't be used against it. The test profile instead gets a small REDIportal-format file and repeat BED listing the spike-in positions (phase 05) in slice coordinates.
+
+## Test data, two layers
+| Layer | Data | Checks |
+|---|---|---|
+| `test` | rnavar reads + slice, with spiked-in A>G edits at known positions and levels | wiring of every phase; detection recovers the spikes (ground truth) |
+| `test_full` (later) | a public high-editing sample (e.g. brain or ENCODE cell line) subset to an Alu-rich chr22 window, real hg38 coordinates | real REDIportal overlap and a plausible Alu Editing Index |
 
 ## Sources
 | | GRCh38 | GRCm39 |
