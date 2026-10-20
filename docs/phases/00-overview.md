@@ -1,6 +1,8 @@
-# 00 — Overview
+# 00 — ADARable: overview
 
-A-to-I RNA editing pipeline: per-sample FASTQ → QC/trim → STAR 2-pass → duplicate marking + read filters → REDItools3 site detection → annotation (REDIportal / dbSNP / Alu) → per-sample and cohort editing-index tables → interactive dashboard.
+**ADARable** is an A-to-I RNA editing pipeline: per-sample FASTQ → QC/trim → STAR 2-pass → duplicate marking + read filters → REDItools3 site detection → annotation (REDIportal / dbSNP / Alu) → per-sample and cohort editing-index tables → interactive dashboard.
+
+The name: ADAR enzymes deaminate adenosine to inosine, which sequencers read as G. ADAR + adorable.
 
 Workflow manager: **Nextflow DSL2** (resume, trace, timeline, execution report). No extra orchestration layer.
 
