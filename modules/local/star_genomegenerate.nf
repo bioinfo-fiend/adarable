@@ -1,6 +1,6 @@
 process STAR_GENOMEGENERATE {
     tag "sjdbOverhang ${params.read_length - 1}"
-    container 'quay.io/biocontainers/star:2.7.11b--h5ca1c30_8'
+    container 'community.wave.seqera.io/library/htslib_samtools_star_gawk:ae438e9a604351a4'   // same image as STAR_ALIGN (nf-core)
     storeDir "${params.ref_cache}/${cache_key}/star_${params.read_length - 1}"
 
     input:

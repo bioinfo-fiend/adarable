@@ -96,7 +96,7 @@ nextflow run main.nf -profile test,docker
 # your data
 nextflow run main.nf -profile docker \
     --input samplesheet.csv \
-    --genome GRCh38 \
+    -c conf/local.config --genome GRCh38 \
     --outdir results
 ```
 
@@ -104,19 +104,11 @@ Use `-profile apptainer` on HPC, and `-resume` to reuse finished steps.
 
 ## References
 
-Nothing is stored in this repo. `--genome GRCh38` or `--genome GRCm39` reads public copies straight from the cloud:
+Nothing is stored in this repo, and nothing is downloaded: you point ADARable at your own reference files. Copy [conf/local.example.config](conf/local.example.config) to `conf/local.config` (git-ignored), fill in your paths, and add `-c conf/local.config --genome <name>`.
 
-| | Source |
-|---|---|
-| Genome FASTA | [Broad public references](https://console.cloud.google.com/storage/browser/gcp-public-data--broad-references) (GENCODE primary assembly) |
-| Annotation | [GENCODE](https://www.gencodegenes.org/) 50 (human), M39 (mouse) |
-| SNPs | dbSNP 138 via Broad (human), Ensembl variation (mouse) |
-| Repeats | [UCSC RepeatMasker](https://genome.ucsc.edu/) (Alu; mouse B1/B2) |
-| Known editing sites | [REDIportal](http://srv00.recas.ba.infn.it/atlas/) (mouse lifted from mm10 to mm39) |
+Only `fasta` and `gtf` are required. Optional: `star_index` (one or more prebuilt dirs, e.g. 100 bp and 150 bp builds; the one matching `--read_length` is used, otherwise one is built), `repeats` (Alu BED or UCSC `rmsk.txt`), `dbsnp` + `dbsnp_index`, `rediportal` (+ `rediportal_chain` for liftOver). Steps without their file are skipped. Single files can also be swapped with `--fasta`, `--gtf`, `--star_index`, `--dbsnp`, `--repeats`, `--rediportal`.
 
 Prepared files (uncompressed FASTA, STAR index, repeat and known-site BEDs) are built once into `--ref_cache` (default `./ref_cache`) and reused on later runs. Point several projects at one shared `--ref_cache` to build them only once.
-
-**Have your own references?** Copy [conf/local.example.config](conf/local.example.config) to `conf/local.config` (git-ignored), set your paths, and add `-c conf/local.config`. Anything you leave out falls back to the cloud copy. Single files can also be swapped with `--fasta`, `--gtf`, `--star_index`, `--dbsnp`, `--repeats`, `--rediportal`.
 
 ## Samplesheet
 
