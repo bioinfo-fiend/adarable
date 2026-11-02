@@ -76,8 +76,8 @@ flowchart TD
     classDef done fill:#23aa62,stroke:#1b8a4f,color:#fff
     classDef todo fill:#24365c,stroke:#3d5a80,color:#fdf0d5
     classDef data fill:#ffd166,stroke:#e0b040,color:#11192e
-    class check,cat,index done
-    class fastqc,fastp,star,markdup,strand,redi,ann,aei,cohort,mqc,dash todo
+    class check,cat,index,fastqc,fastp,mqc done
+    class star,markdup,strand,redi,ann,aei,cohort,dash todo
     class sheet,fasta,known data
 ```
 
@@ -144,8 +144,8 @@ Provenance (parameters, tool versions, logs) is written next to the results, so 
 | [00](docs/phases/00-overview.md) | Overview, samplesheet contract, design decisions | ✅ done |
 | [01](docs/phases/01-skeleton.md) | Skeleton: config, profiles, samplesheet check, FASTQ merge, provenance | ✅ done |
 | [02](docs/phases/02-references.md) | References for GRCh38 and GRCm39, STAR index, test slice | ✅ done |
-| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, MultiQC | 🚧 next |
-| [04](docs/phases/04-align-dedup.md) | STAR 2-pass, MarkDuplicates, strandedness inference | ⏳ planned |
+| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, MultiQC | ✅ done |
+| [04](docs/phases/04-align-dedup.md) | STAR 2-pass, MarkDuplicates, strandedness inference | 🚧 next |
 | [05](docs/phases/05-editing-detection.md) | REDItools3 site detection | ⏳ planned |
 | [06](docs/phases/06-annotation.md) | Annotation against REDIportal, dbSNP, repeats | ⏳ planned |
 | [07](docs/phases/07-editing-index.md) | Alu Editing Index and cohort tables | ⏳ planned |
