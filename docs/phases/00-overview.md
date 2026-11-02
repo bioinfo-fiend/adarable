@@ -28,8 +28,8 @@ CSV, header required:
 |---|---|---|
 | 01 | [01-skeleton.md](01-skeleton.md) | `main.nf`, config, profiles, samplesheet check, FASTQ merge, provenance |
 | 02 | [02-references.md](02-references.md) | `conf/genomes.config` (GRCh38, GRCm39), STAR index, test slice |
-| 03 | [03-qc-trim.md](03-qc-trim.md) | FastQC, fastp, MultiQC |
-| 04 | [04-align-dedup.md](04-align-dedup.md) | STAR 2-pass, MarkDuplicates, strandedness inference |
+| 03 | [03-qc-trim.md](03-qc-trim.md) | FastQC, fastp, RiboDetector, MultiQC |
+| 04 | [04-align-dedup.md](04-align-dedup.md) | STAR 2-pass, duplicates, strandedness inference, bigWigs |
 | 05 | [05-editing-detection.md](05-editing-detection.md) | REDItools3, detector swap contract |
 | 06 | [06-annotation.md](06-annotation.md) | known/SNP/Alu/gene annotation, A>G filtering |
 | 07 | [07-editing-index.md](07-editing-index.md) | Alu Editing Index, cohort tables |
@@ -43,16 +43,17 @@ Every phase ends runnable on `-profile test,docker`.
 | cat re-sequenced FASTQs | **kept** (phase 01) |
 | strandedness auto-infer | **kept**, via RSeQC `infer_experiment.py` on the BAM instead of Salmon (phase 04) |
 | FastQC | **kept** (phase 03) |
-| UMI extraction / dedup | **optional**, off by default, fastp `--umi` (phase 03) |
+| UMI extraction / dedup | **optional**, off by default: fastp `--umi` (phase 03), umi_tools dedup (phase 04) |
 | Trim Galore | **replaced** by fastp: one tool, JSON for MultiQC |
 | STAR | **kept**, 2-pass (phase 04) |
 | SAMtools sort/index/stats | **kept** |
-| Picard MarkDuplicates | **kept** |
+| Picard MarkDuplicates | **replaced** by samtools markdup: already in the STAR image, no Java |
 | MultiQC | **kept** |
-| BBSplit, SortMeRNA | skipped: add if contamination/rRNA shows up in QC |
+| SortMeRNA | **replaced** by RiboDetector: no rRNA database, faster; % rRNA always reported, removal with `--remove_rrna` (phase 03) |
+| BBSplit | skipped: add if contamination shows up in QC |
 | Salmon, RSEM, Kallisto, StringTie, DESeq2 | skipped: quantification, not editing; add for ADAR expression covariates |
 | HISAT2 route | skipped: one aligner |
-| bigWig coverage | skipped |
+| bigWig coverage | **kept**, deepTools bamCoverage, CPM, per strand when stranded (phase 04) |
 | RSeQC (beyond infer_experiment), Qualimap, dupRadar, Preseq, RustQC | skipped: add when QC questions need them |
 | Kraken2/Bracken, Sylph | skipped |
 
@@ -60,7 +61,7 @@ Every phase ends runnable on `-profile test,docker`.
 ```
 results/
   pipeline_info/   params.json, software_versions.yml, execution_report.html, timeline.html, trace.txt, dag.html
-  samples/<id>/    fastqc/, fastp/, star/, markdup/, strand.txt, reditools/, annotated_sites.tsv.gz, editing_index.tsv
+  samples/<id>/    fastqc/, fastp/, star/, dedup/, bigwig/, strand.txt, reditools/, annotated_sites.tsv.gz, editing_index.tsv
   cohort/          editing_index.tsv, sites_matrix.tsv.gz
   multiqc/         multiqc_report.html
   dashboard.html

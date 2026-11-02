@@ -3,7 +3,8 @@
 ## Delivers
 - `FASTQC` on raw (merged) reads.
 - `FASTP`: adapter auto-detect, quality trim, length filter; `--json` for MultiQC. Optional UMI extraction (`params.umi_loc`, `params.umi_len`), off by default.
-- `MULTIQC` collecting fastqc/fastp now, extended by later phases (STAR, MarkDuplicates, samtools stats).
+- `RIBODETECTOR` on the trimmed reads: % rRNA into the MultiQC general stats table. `--remove_rrna` maps only the non-rRNA reads; `--skip_ribodetector` turns it off.
+- `MULTIQC` collecting fastqc/fastp/RiboDetector, extended by later phases (STAR, samtools, RSeQC).
 
 ## Decisions
 - fastp instead of Trim Galore (fewer tools, faster, JSON output).
@@ -16,6 +17,7 @@
 - Inputs are linked to `<id>.fastq.gz` / `<id>_{1,2}.fastq.gz` before FastQC and fastp, so reports and MultiQC rows carry sample ids.
 - Trimmed FASTQs stay in `work/` (feed STAR); only reports are published.
 - Verified: `-profile test,docker` passes; `rnavar_pe` 8,318 -> 8,306 reads after filtering, 42 adapter-trimmed; MultiQC has fastqc and fastp sections for both samples; `--umi_loc read1 --umi_len 8` runs.
+- RiboDetector `0.3.3` (CPU model, `-l --read_length`). Paired-end uses `-e rrna`: a pair counts as rRNA only when both mates are called rRNA. MultiQC has no RiboDetector module, so the step writes a custom-content `*_mqc.tsv` (log has ANSI colour codes, stripped in awk). Test reads: 0% (PE), 0.05% (SE); `--remove_rrna` feeds `*.nonrrna.fastq.gz` to STAR.
 
 ## Done when
 `results/samples/<id>/fastp/` and `results/multiqc/multiqc_report.html` exist on the test profile.

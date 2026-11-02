@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo/adarable.svg" alt="ADARable" width="560">
+  <img src="assets/logo/adarable.png" alt="ADARable: A-to-I RNA editing, the adorable way" width="720">
 </p>
 
 <p align="center">
@@ -24,9 +24,10 @@ flowchart TD
     subgraph qc ["03 · QC + trim"]
         fastqc["FastQC"]
         fastp["fastp<br/>adapters, quality, optional UMI"]
+        ribo["RiboDetector<br/>% rRNA, optional removal"]
     end
     cat --> fastqc
-    cat --> fastp
+    cat --> fastp --> ribo
 
     subgraph refs ["02 · References"]
         fasta[("FASTA + GTF")]
@@ -37,12 +38,14 @@ flowchart TD
 
     subgraph align ["04 · Align + dedup"]
         star["STAR 2-pass<br/>unique, end-to-end"]
-        markdup["Picard MarkDuplicates<br/>+ samtools stats"]
+        markdup["samtools markdup<br/>or umi_tools dedup (UMIs)"]
+        bigwig["bigWig coverage<br/>deepTools bamCoverage"]
         strand["Infer strandedness<br/>RSeQC infer_experiment"]
     end
-    fastp --> star
+    ribo --> star
     index --> star
     star --> markdup --> strand
+    markdup --> bigwig
 
     subgraph detect ["05 · Detection"]
         redi["REDItools3<br/>MAPQ ≥ 20, BQ ≥ 25, no dups"]
@@ -76,8 +79,8 @@ flowchart TD
     classDef done fill:#23aa62,stroke:#1b8a4f,color:#fff
     classDef todo fill:#24365c,stroke:#3d5a80,color:#fdf0d5
     classDef data fill:#ffd166,stroke:#e0b040,color:#11192e
-    class check,cat,index,fastqc,fastp,mqc done
-    class star,markdup,strand,redi,ann,aei,cohort,dash todo
+    class check,cat,index,fastqc,fastp,ribo,mqc,star,markdup,strand,bigwig done
+    class redi,ann,aei,cohort,dash todo
     class sheet,fasta,known data
 ```
 
@@ -144,9 +147,9 @@ Provenance (parameters, tool versions, logs) is written next to the results, so 
 | [00](docs/phases/00-overview.md) | Overview, samplesheet contract, design decisions | ✅ done |
 | [01](docs/phases/01-skeleton.md) | Skeleton: config, profiles, samplesheet check, FASTQ merge, provenance | ✅ done |
 | [02](docs/phases/02-references.md) | References for GRCh38 and GRCm39, STAR index, test slice | ✅ done |
-| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, MultiQC | ✅ done |
-| [04](docs/phases/04-align-dedup.md) | STAR 2-pass, MarkDuplicates, strandedness inference | 🚧 next |
-| [05](docs/phases/05-editing-detection.md) | REDItools3 site detection | ⏳ planned |
+| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, RiboDetector, MultiQC | ✅ done |
+| [04](docs/phases/04-align-dedup.md) | STAR 2-pass, duplicates (samtools / umi_tools), strandedness, bigWigs | ✅ done |
+| [05](docs/phases/05-editing-detection.md) | REDItools3 site detection | 🚧 next |
 | [06](docs/phases/06-annotation.md) | Annotation against REDIportal, dbSNP, repeats | ⏳ planned |
 | [07](docs/phases/07-editing-index.md) | Alu Editing Index and cohort tables | ⏳ planned |
 | [08](docs/phases/08-dashboard.md) | Interactive results dashboard | ⏳ planned |
@@ -164,8 +167,10 @@ Provenance (parameters, tool versions, logs) is written next to the results, so 
 [REDItools](https://github.com/BioinfoUNIBA/REDItools3) ·
 [STAR](https://github.com/alexdobin/STAR) ·
 [fastp](https://github.com/OpenGene/fastp) ·
+[RiboDetector](https://github.com/hzi-bifo/RiboDetector) ·
 [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) ·
-[Picard](https://broadinstitute.github.io/picard/) ·
+[UMI-tools](https://github.com/CGATOxford/UMI-tools) ·
+[deepTools](https://deeptools.readthedocs.io/) ·
 [SAMtools](https://www.htslib.org/) ·
 [RSeQC](https://rseqc.sourceforge.net/) ·
 [MultiQC](https://multiqc.info/) ·

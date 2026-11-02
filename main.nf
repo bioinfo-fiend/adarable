@@ -10,6 +10,14 @@ include { PREP_KNOWN_SITES    } from './modules/local/prep_known_sites'
 include { FASTQC              } from './modules/local/fastqc'
 include { FASTP               } from './modules/local/fastp'
 include { MULTIQC             } from './modules/local/multiqc'
+include { RIBODETECTOR        } from './modules/local/ribodetector'
+include { PREP_GENE_BED       } from './modules/local/prep_gene_bed'
+include { STAR_ALIGN          } from './modules/local/star_align'
+include { SAMTOOLS_MARKDUP    } from './modules/local/samtools_markdup'
+include { UMITOOLS_DEDUP      } from './modules/local/umitools_dedup'
+include { SAMTOOLS_STATS      } from './modules/local/samtools_stats'
+include { INFER_STRAND        } from './modules/local/infer_strand'
+include { BAMCOVERAGE         } from './modules/local/bamcoverage'
 
 // --fasta etc. win over the --genome entry (conf/genomes.config, or your -c conf/local.config)
 def ref(String key) {
@@ -68,6 +76,13 @@ workflow {
     ch_multiqc = FASTQC.out.zip.map { _meta, zip -> zip }
         .mix(FASTP.out.json.map { _meta, json -> json })
 
+    if (!params.skip_ribodetector) {
+        RIBODETECTOR(ch_trimmed)
+        if (params.remove_rrna) ch_trimmed = RIBODETECTOR.out.reads
+        ch_multiqc  = ch_multiqc.mix(RIBODETECTOR.out.mqc)
+        ch_versions = ch_versions.mix(RIBODETECTOR.out.versions)
+    }
+
     // References (phase 02): prepared once, cached in --ref_cache
     if (!ref('fasta') || !ref('gtf')) error "Need --fasta and --gtf, or a --genome with both (see conf/local.example.config)"
 
@@ -113,6 +128,47 @@ workflow {
     }
 
     ch_dbsnp = ref('dbsnp') ? channel.value([file(ref('dbsnp'), checkIfExists: true), file(ref('dbsnp_index'), checkIfExists: true)]) : channel.value([])
+
+    // Alignment, duplicates, strandedness (phase 04)
+    STAR_ALIGN(ch_trimmed, ch_star)
+    ch_versions = ch_versions.mix(STAR_ALIGN.out.versions)
+    ch_multiqc  = ch_multiqc.mix(STAR_ALIGN.out.log.map { _meta, log -> log })
+
+    if (params.umi_loc) {
+        UMITOOLS_DEDUP(STAR_ALIGN.out.bam)
+        ch_dedup    = UMITOOLS_DEDUP.out.bam
+        ch_multiqc  = ch_multiqc.mix(UMITOOLS_DEDUP.out.log)
+        ch_versions = ch_versions.mix(UMITOOLS_DEDUP.out.versions)
+    } else {
+        SAMTOOLS_MARKDUP(STAR_ALIGN.out.bam)
+        ch_dedup    = SAMTOOLS_MARKDUP.out.bam
+        ch_multiqc  = ch_multiqc.mix(SAMTOOLS_MARKDUP.out.stats)
+        ch_versions = ch_versions.mix(SAMTOOLS_MARKDUP.out.versions)
+    }
+
+    SAMTOOLS_STATS(ch_dedup)
+    ch_multiqc  = ch_multiqc.mix(SAMTOOLS_STATS.out.stats)
+    ch_versions = ch_versions.mix(SAMTOOLS_STATS.out.versions)
+
+    PREP_GENE_BED(cache_key, file(ref('gtf'), checkIfExists: true))
+    INFER_STRAND(STAR_ALIGN.out.bam, PREP_GENE_BED.out.bed)
+    ch_multiqc  = ch_multiqc.mix(INFER_STRAND.out.txt.map { _meta, txt -> txt })
+    ch_versions = ch_versions.mix(PREP_GENE_BED.out.versions, INFER_STRAND.out.versions)
+
+    // Inferred strand fills in 'auto'; a declared value wins but is checked
+    ch_strand = INFER_STRAND.out.strand.map { meta, f ->
+        def inferred = f.text.trim()
+        if (meta.strandedness != 'auto' && meta.strandedness != inferred)
+            log.warn "${meta.id}: samplesheet says ${meta.strandedness}, reads look ${inferred}; keeping ${meta.strandedness}"
+        [meta.id, meta.strandedness == 'auto' ? inferred : meta.strandedness]
+    }
+    ch_bam = ch_dedup
+        .map { meta, bam, bai -> [meta.id, meta, bam, bai] }
+        .join(ch_strand)
+        .map { _id, meta, bam, bai, strand -> [meta + [strandedness: strand], bam, bai] }
+
+    BAMCOVERAGE(ch_bam)
+    ch_versions = ch_versions.mix(BAMCOVERAGE.out.versions)
 
     MULTIQC(ch_multiqc.flatten().collect())
     ch_versions = ch_versions.mix(MULTIQC.out.versions)
