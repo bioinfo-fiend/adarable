@@ -10,6 +10,7 @@ include { PREP_KNOWN_SITES    } from './modules/local/prep_known_sites'
 include { FASTQC              } from './modules/local/fastqc'
 include { FASTP               } from './modules/local/fastp'
 include { MULTIQC             } from './modules/local/multiqc'
+include { RIBODETECTOR        } from './modules/local/ribodetector'
 include { PREP_GENE_BED       } from './modules/local/prep_gene_bed'
 include { STAR_ALIGN          } from './modules/local/star_align'
 include { SAMTOOLS_MARKDUP    } from './modules/local/samtools_markdup'
@@ -74,6 +75,13 @@ workflow {
 
     ch_multiqc = FASTQC.out.zip.map { _meta, zip -> zip }
         .mix(FASTP.out.json.map { _meta, json -> json })
+
+    if (!params.skip_ribodetector) {
+        RIBODETECTOR(ch_trimmed)
+        if (params.remove_rrna) ch_trimmed = RIBODETECTOR.out.reads
+        ch_multiqc  = ch_multiqc.mix(RIBODETECTOR.out.mqc)
+        ch_versions = ch_versions.mix(RIBODETECTOR.out.versions)
+    }
 
     // References (phase 02): prepared once, cached in --ref_cache
     if (!ref('fasta') || !ref('gtf')) error "Need --fasta and --gtf, or a --genome with both (see conf/local.example.config)"

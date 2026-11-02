@@ -24,9 +24,10 @@ flowchart TD
     subgraph qc ["03 · QC + trim"]
         fastqc["FastQC"]
         fastp["fastp<br/>adapters, quality, optional UMI"]
+        ribo["RiboDetector<br/>% rRNA, optional removal"]
     end
     cat --> fastqc
-    cat --> fastp
+    cat --> fastp --> ribo
 
     subgraph refs ["02 · References"]
         fasta[("FASTA + GTF")]
@@ -41,7 +42,7 @@ flowchart TD
         bigwig["bigWig coverage<br/>deepTools bamCoverage"]
         strand["Infer strandedness<br/>RSeQC infer_experiment"]
     end
-    fastp --> star
+    ribo --> star
     index --> star
     star --> markdup --> strand
     markdup --> bigwig
@@ -78,7 +79,7 @@ flowchart TD
     classDef done fill:#23aa62,stroke:#1b8a4f,color:#fff
     classDef todo fill:#24365c,stroke:#3d5a80,color:#fdf0d5
     classDef data fill:#ffd166,stroke:#e0b040,color:#11192e
-    class check,cat,index,fastqc,fastp,mqc,star,markdup,strand,bigwig done
+    class check,cat,index,fastqc,fastp,ribo,mqc,star,markdup,strand,bigwig done
     class redi,ann,aei,cohort,dash todo
     class sheet,fasta,known data
 ```
@@ -146,7 +147,7 @@ Provenance (parameters, tool versions, logs) is written next to the results, so 
 | [00](docs/phases/00-overview.md) | Overview, samplesheet contract, design decisions | ✅ done |
 | [01](docs/phases/01-skeleton.md) | Skeleton: config, profiles, samplesheet check, FASTQ merge, provenance | ✅ done |
 | [02](docs/phases/02-references.md) | References for GRCh38 and GRCm39, STAR index, test slice | ✅ done |
-| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, MultiQC | ✅ done |
+| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, RiboDetector, MultiQC | ✅ done |
 | [04](docs/phases/04-align-dedup.md) | STAR 2-pass, duplicates (samtools / umi_tools), strandedness, bigWigs | ✅ done |
 | [05](docs/phases/05-editing-detection.md) | REDItools3 site detection | 🚧 next |
 | [06](docs/phases/06-annotation.md) | Annotation against REDIportal, dbSNP, repeats | ⏳ planned |
@@ -166,6 +167,7 @@ Provenance (parameters, tool versions, logs) is written next to the results, so 
 [REDItools](https://github.com/BioinfoUNIBA/REDItools3) ·
 [STAR](https://github.com/alexdobin/STAR) ·
 [fastp](https://github.com/OpenGene/fastp) ·
+[RiboDetector](https://github.com/hzi-bifo/RiboDetector) ·
 [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) ·
 [UMI-tools](https://github.com/CGATOxford/UMI-tools) ·
 [deepTools](https://deeptools.readthedocs.io/) ·
