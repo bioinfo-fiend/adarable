@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo/adarable.svg" alt="ADARable" width="560">
+  <img src="assets/logo/adarable.png" alt="ADARable: A-to-I RNA editing, the adorable way" width="720">
 </p>
 
 <p align="center">
