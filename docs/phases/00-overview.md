@@ -60,7 +60,7 @@ Every phase ends runnable on `-profile test,docker`.
 ```
 results/
   pipeline_info/   params.json, software_versions.yml, execution_report.html, timeline.html, trace.txt, dag.html
-  samples/<id>/    fastp/, star/, markdup/, strand.txt, reditools/, annotated_sites.tsv.gz, editing_index.tsv
+  samples/<id>/    fastqc/, fastp/, star/, markdup/, strand.txt, reditools/, annotated_sites.tsv.gz, editing_index.tsv
   cohort/          editing_index.tsv, sites_matrix.tsv.gz
   multiqc/         multiqc_report.html
   dashboard.html

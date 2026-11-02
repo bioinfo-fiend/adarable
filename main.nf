@@ -7,6 +7,9 @@ include { PREP_FASTA          } from './modules/local/prep_fasta'
 include { STAR_GENOMEGENERATE } from './modules/local/star_genomegenerate'
 include { PREP_REPEATS        } from './modules/local/prep_repeats'
 include { PREP_KNOWN_SITES    } from './modules/local/prep_known_sites'
+include { FASTQC              } from './modules/local/fastqc'
+include { FASTP               } from './modules/local/fastp'
+include { MULTIQC             } from './modules/local/multiqc'
 
 // --fasta etc. win over the --genome entry (conf/genomes.config, or your -c conf/local.config)
 def ref(String key) {
@@ -54,7 +57,16 @@ workflow {
         .map { meta, r1, r2 -> [meta, r1 + r2] }
         .mix(CAT_FASTQ.out.reads)
 
-    ch_reads.view { meta, reads -> "reads: ${meta.id} ${reads*.name}" }
+    // QC and trimming (phase 03)
+    if (params.umi_loc && !params.umi_len) error "--umi_loc needs --umi_len"
+
+    FASTQC(ch_reads)
+    FASTP(ch_reads)
+    ch_trimmed  = FASTP.out.reads
+    ch_versions = ch_versions.mix(FASTQC.out.versions, FASTP.out.versions)
+
+    ch_multiqc = FASTQC.out.zip.map { _meta, zip -> zip }
+        .mix(FASTP.out.json.map { _meta, json -> json })
 
     // References (phase 02): prepared once, cached in --ref_cache
     if (!ref('fasta') || !ref('gtf')) error "Need --fasta and --gtf, or a --genome with both (see conf/local.example.config)"
@@ -102,8 +114,12 @@ workflow {
 
     ch_dbsnp = ref('dbsnp') ? channel.value([file(ref('dbsnp'), checkIfExists: true), file(ref('dbsnp_index'), checkIfExists: true)]) : channel.value([])
 
+    MULTIQC(ch_multiqc.flatten().collect())
+    ch_versions = ch_versions.mix(MULTIQC.out.versions)
+
     // Provenance
     ch_versions
+        .map { it.text }   // per-sample processes emit identical files; dedupe by content
         .unique()
         .collectFile(name: 'software_versions.yml', storeDir: "${params.outdir}/pipeline_info", sort: true)
 }
