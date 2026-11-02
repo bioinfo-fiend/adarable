@@ -8,12 +8,12 @@ include { STAR_GENOMEGENERATE } from './modules/local/star_genomegenerate'
 include { PREP_REPEATS        } from './modules/local/prep_repeats'
 include { PREP_KNOWN_SITES    } from './modules/local/prep_known_sites'
 
-// --fasta etc. win over the --genome entry in conf/genomes.config; an entry with `base` falls back to that genome
+// --fasta etc. win over the --genome entry (conf/genomes.config, or your -c conf/local.config)
 def ref(String key) {
     if (!params.genome) return params[key]
     def g = params.genomes[params.genome]
-    if (!g) error "Unknown --genome '${params.genome}'. Known: ${params.genomes.keySet().join(', ')}"
-    params[key] ?: g[key] ?: (g.base ? params.genomes[g.base][key] : null)
+    if (!g) error "Unknown --genome '${params.genome}'. Known: ${params.genomes.keySet().join(', ')}. Add yours with -c conf/local.config (see conf/local.example.config)"
+    params[key] ?: g[key]
 }
 
 // Relative FASTQ paths resolve against the samplesheet's directory.
@@ -57,17 +57,28 @@ workflow {
     ch_reads.view { meta, reads -> "reads: ${meta.id} ${reads*.name}" }
 
     // References (phase 02): prepared once, cached in --ref_cache
-    if (!ref('fasta') || !ref('gtf')) error "Need --fasta and --gtf (or a --genome with both)"
+    if (!ref('fasta') || !ref('gtf')) error "Need --fasta and --gtf, or a --genome with both (see conf/local.example.config)"
 
     // Cache folder per reference: the genome name alone would reuse a STAR index built from another FASTA
     def cache_key = "${params.genome ?: 'custom'}-${ref('fasta').toString().md5().take(8)}"
 
     PREP_FASTA(cache_key, file(ref('fasta'), checkIfExists: true))
     ch_fasta = PREP_FASTA.out.fasta
+    ch_fai   = ch_fasta.map { _fa, fai -> fai }   // repeat/known-site BEDs are renamed to its contigs
     ch_versions = ch_versions.mix(PREP_FASTA.out.versions)
 
-    if (ref('star_index')) {
-        ch_star = channel.value(file(ref('star_index'), checkIfExists: true))
+    // STAR fixes sjdbOverhang at index build and refuses another at mapping, so pick the prebuilt index
+    // (one dir, or a list / comma-separated dirs, e.g. 100 bp and 150 bp builds) matching --read_length
+    def overhang  = "${params.read_length - 1}"
+    def star_ref  = ref('star_index')
+    def star_dirs = (star_ref instanceof List ? star_ref : star_ref?.tokenize(',') ?: []).collect { file(it, checkIfExists: true) }
+    def star_hit  = star_dirs.find { d ->
+        d.resolve('genomeParameters.txt').readLines().find { it.startsWith('sjdbOverhang') }?.tokenize()?.last() == overhang
+    }
+    if (star_dirs && !star_hit) log.warn "No --star_index built with sjdbOverhang ${overhang} (--read_length ${params.read_length}); building one into --ref_cache"
+
+    if (star_hit) {
+        ch_star = channel.value(star_hit)
     } else {
         STAR_GENOMEGENERATE(cache_key, ch_fasta, file(ref('gtf'), checkIfExists: true))
         ch_star = STAR_GENOMEGENERATE.out.index
@@ -76,7 +87,7 @@ workflow {
 
     ch_repeats = channel.value([])
     if (ref('repeats')) {
-        PREP_REPEATS(cache_key, file(ref('repeats'), checkIfExists: true), ref('repeat_families') ?: 'Alu')
+        PREP_REPEATS(cache_key, ch_fai, file(ref('repeats'), checkIfExists: true), ref('repeat_families') ?: 'Alu')
         ch_repeats = PREP_REPEATS.out.bed
         ch_versions = ch_versions.mix(PREP_REPEATS.out.versions)
     }
@@ -84,7 +95,7 @@ workflow {
     ch_known = channel.value([])
     if (ref('rediportal')) {
         def chain = ref('rediportal_chain') ? file(ref('rediportal_chain'), checkIfExists: true) : []
-        PREP_KNOWN_SITES(cache_key, file(ref('rediportal'), checkIfExists: true), chain)
+        PREP_KNOWN_SITES(cache_key, ch_fai, file(ref('rediportal'), checkIfExists: true), chain)
         ch_known = PREP_KNOWN_SITES.out.bed
         ch_versions = ch_versions.mix(PREP_KNOWN_SITES.out.versions)
     }

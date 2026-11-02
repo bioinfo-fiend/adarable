@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Rename column 1 of a TSV/BED on stdin to the FASTA's contig names (from its .fai), drop contigs it lacks.
+# Handles UCSC <-> Ensembl: chr1 <-> 1, chrM <-> MT, chr1_KI270706v1_random / chrUn_GL000220v1 -> KI270706.1 / GL000220.1.
+# Usage: ... | match_chroms genome.fa.fai > out
+set -euo pipefail
+awk -F'\t' -v OFS='\t' '
+    NR == FNR { have[$1] = 1; next }
+    {
+        c = $1
+        if (!(c in have)) {
+            s = c; sub(/^chr/, "", s); if (s == "M") s = "MT"
+            t = (c == "MT") ? "chrM" : "chr" c
+            if (s in have) c = s
+            else if (t in have) c = t
+            else if (match(c, /_[A-Z]+[0-9]+v[0-9]+/)) { c = substr(c, RSTART + 1, RLENGTH - 1); sub(/v/, ".", c) }
+            if (!(c in have)) { dropped[$1]++; n++; next }
+        }
+        $1 = c
+        print
+    }
+    END { if (n) printf "match_chroms: dropped %d rows on %d contigs not in the FASTA\n", n, length(dropped) > "/dev/stderr" }
+' "$1" -
