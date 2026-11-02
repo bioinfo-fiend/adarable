@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# GTF on stdin -> BED12 of transcripts (one block per exon) on stdout, for RSeQC infer_experiment.py.
+# Usage: ... | gtf2bed12 > genes.bed
+set -euo pipefail
+awk -F'\t' -v OFS='\t' '
+    $3 == "exon" && match($9, /transcript_id "[^"]+"/) {
+        t = substr($9, RSTART + 15, RLENGTH - 16)
+        if (!(t in chr)) { chr[t] = $1; str[t] = $7; n[t] = 0 }
+        k = ++n[t]; s[t, k] = $4 - 1; e[t, k] = $5
+    }
+    END {
+        for (t in chr) {
+            m = n[t]
+            # exons come in transcript order (descending on minus strand): insertion sort by start
+            for (i = 2; i <= m; i++) {
+                a = s[t, i]; b = e[t, i]
+                for (j = i - 1; j >= 1 && s[t, j] > a; j--) { s[t, j + 1] = s[t, j]; e[t, j + 1] = e[t, j] }
+                s[t, j + 1] = a; e[t, j + 1] = b
+            }
+            lo = s[t, 1]; hi = e[t, m]; sizes = ""; starts = ""
+            for (i = 1; i <= m; i++) {
+                if (e[t, i] > hi) hi = e[t, i]
+                sizes = sizes (e[t, i] - s[t, i]) ","; starts = starts (s[t, i] - lo) ","
+            }
+            print chr[t], lo, hi, t, 0, str[t], lo, hi, 0, m, sizes, starts
+        }
+    }
+' | sort -k1,1 -k2,2n

@@ -28,6 +28,6 @@ process PREP_REPEATS {
                 'BEGIN {n=split(fams,a,","); for(i=1;i<=n;i++) keep[a[i]]=1} keep[\$13] {print \$6,\$7,\$8,\$11,\$13,\$10}' \\
             | match_chroms ${fai} \\
             | sort -k1,1 -k2,2n > repeats.bed
-        echo '"${task.process}": {awk: "'"\$(awk --version 2>&1 | head -1)"'"}' > versions.yml
+        echo '"${task.process}": {awk: "'"\$(awk 2>&1 | head -1)"'"}' > versions.yml
         """
 }
