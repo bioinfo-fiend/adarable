@@ -1,0 +1,4 @@
+sample,fastq_1,fastq_2,strandedness
+rnavar_pe,test/rnavar_run1_R1.fastq.gz,test/rnavar_run1_R2.fastq.gz,auto
+rnavar_pe,test/rnavar_run2_R1.fastq.gz,test/rnavar_run2_R2.fastq.gz,auto
+rnavar_se,test/rnavar_run1_R1.fastq.gz,,auto

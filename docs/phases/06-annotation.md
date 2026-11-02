@@ -15,4 +15,4 @@ Filters (params, defaults):
 - Interval lookups: GTF/BED loaded into per-chrom sorted lists + `bisect` (no pybedtools).
 
 ## Done when
-Spiked site is flagged `known_rediportal=True`, `repeat=Alu` in the test output.
+Spike-ins listed in the test REDIportal file are flagged `known_rediportal=True`; those inside the test repeat BED get `repeat=Alu`.

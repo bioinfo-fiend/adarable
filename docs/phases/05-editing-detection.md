@@ -1,7 +1,7 @@
 # 05 — Editing-site detection (REDItools3)
 
 ## Delivers
-- `REDITOOLS` process: REDItools3 (`pip install reditools`, pinned latest; container via Wave from `conda`/`pip`, fallback `containers/reditools/Dockerfile`).
+- `REDITOOLS` process: REDItools3 (PyPI package `reditools3`, latest 3.7 as of 2026-10; pin exact version; container via Wave from `conda`/`pip`, fallback `containers/reditools/Dockerfile`).
   `reditools analyze <bam> --reference <fasta> --strand <0|1|2> --min-base-quality 25 --min-read-quality 20 ...` with optional `--bed-file` to restrict to known sites (fast mode).
 - Output: `results/samples/<id>/reditools/<id>.reditools.tsv.gz`.
 - Parallelism: split by chromosome (scatter over `fasta.fai` contigs, gather with `cat`) when genome-wide.
@@ -15,4 +15,7 @@ Phase 06 reads only `Region, Position, Reference, Strand, Coverage-q30, BaseCoun
 `unstranded → 0`, `forward → 1`, `reverse → 2` (REDItools convention; verify against installed version's `--help` when pinning).
 
 ## Done when
-Test run produces a REDItools table containing the spiked known chr22 site.
+Test run recovers the spike-ins.
+
+## Spike-in ground truth
+`bin/spike_edits.py` (run once, output committed to `assets/test/`): picks ~20 reference A positions in the slice with coverage ≥ 20 in the test reads, and converts A→G (T→C on reverse-strand reads) in a chosen fraction of the reads covering each one (levels 10–90%). Writes the edited FASTQs and `spikes.tsv` (`pos, level`). Done when every spike is called within ±10% of its level and no more than a handful of other A>G sites appear.

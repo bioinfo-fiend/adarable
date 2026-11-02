@@ -76,8 +76,8 @@ flowchart TD
     classDef done fill:#23aa62,stroke:#1b8a4f,color:#fff
     classDef todo fill:#24365c,stroke:#3d5a80,color:#fdf0d5
     classDef data fill:#ffd166,stroke:#e0b040,color:#11192e
-    class check,cat done
-    class fastqc,fastp,index,star,markdup,strand,redi,ann,aei,cohort,mqc,dash todo
+    class check,cat,index done
+    class fastqc,fastp,star,markdup,strand,redi,ann,aei,cohort,mqc,dash todo
     class sheet,fasta,known data
 ```
 
@@ -90,17 +90,25 @@ Needs [Nextflow](https://www.nextflow.io/) ≥ 25.04 and Docker or Apptainer.
 ```bash
 git clone https://github.com/bioinfo-fiend/adarable.git && cd adarable
 
-# smoke test on bundled synthetic reads
+# smoke test on bundled real reads (tiny chr22 slice)
 nextflow run main.nf -profile test,docker
 
 # your data
 nextflow run main.nf -profile docker \
     --input samplesheet.csv \
-    --genome GRCh38 \
+    -c conf/local.config --genome GRCh38 \
     --outdir results
 ```
 
 Use `-profile apptainer` on HPC, and `-resume` to reuse finished steps.
+
+## References
+
+Nothing is stored in this repo, and nothing is downloaded: you point ADARable at your own reference files. Copy [conf/local.example.config](conf/local.example.config) to `conf/local.config` (git-ignored), fill in your paths, and add `-c conf/local.config --genome <name>`.
+
+Only `fasta` and `gtf` are required. Optional: `star_index` (one or more prebuilt dirs, e.g. 100 bp and 150 bp builds; the one matching `--read_length` is used, otherwise one is built), `repeats` (Alu BED or UCSC `rmsk.txt`), `dbsnp` + `dbsnp_index`, `rediportal` (+ `rediportal_chain` for liftOver). Steps without their file are skipped. Single files can also be swapped with `--fasta`, `--gtf`, `--star_index`, `--dbsnp`, `--repeats`, `--rediportal`.
+
+Prepared files (uncompressed FASTA, STAR index, repeat and known-site BEDs) are built once into `--ref_cache` (default `./ref_cache`) and reused on later runs. Point several projects at one shared `--ref_cache` to build them only once.
 
 ## Samplesheet
 
@@ -134,9 +142,9 @@ Provenance (parameters, tool versions, logs) is written next to the results, so 
 | Phase | What | Status |
 |---|---|---|
 | [00](docs/phases/00-overview.md) | Overview, samplesheet contract, design decisions | ✅ done |
-| [01](docs/phases/01-skeleton.md) | Skeleton: config, profiles, samplesheet check, FASTQ merge, provenance | 🚧 in progress |
-| [02](docs/phases/02-references.md) | References for GRCh38 and GRCm39, STAR index, test slice | ⏳ planned |
-| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, MultiQC | ⏳ planned |
+| [01](docs/phases/01-skeleton.md) | Skeleton: config, profiles, samplesheet check, FASTQ merge, provenance | ✅ done |
+| [02](docs/phases/02-references.md) | References for GRCh38 and GRCm39, STAR index, test slice | ✅ done |
+| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, MultiQC | 🚧 next |
 | [04](docs/phases/04-align-dedup.md) | STAR 2-pass, MarkDuplicates, strandedness inference | ⏳ planned |
 | [05](docs/phases/05-editing-detection.md) | REDItools3 site detection | ⏳ planned |
 | [06](docs/phases/06-annotation.md) | Annotation against REDIportal, dbSNP, repeats | ⏳ planned |
