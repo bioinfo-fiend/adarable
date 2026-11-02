@@ -18,6 +18,7 @@
 - Trimmed FASTQs stay in `work/` (feed STAR); only reports are published.
 - Verified: `-profile test,docker` passes; `rnavar_pe` 8,318 -> 8,306 reads after filtering, 42 adapter-trimmed; MultiQC has fastqc and fastp sections for both samples; `--umi_loc read1 --umi_len 8` runs.
 - RiboDetector `0.3.3` (CPU model, `-l --read_length`). Paired-end uses `-e rrna`: a pair counts as rRNA only when both mates are called rRNA. MultiQC has no RiboDetector module, so the step writes a custom-content `*_mqc.tsv` (log has ANSI colour codes, stripped in awk). Test reads: 0% (PE), 0.05% (SE); `--remove_rrna` feeds `*.nonrrna.fastq.gz` to STAR.
+- Without `--remove_rrna`, only the first `--rrna_reads` (default 2 M) reads or pairs are classified. On a 20-sample human cohort RiboDetector managed about 2,600 pairs/s on 8 CPUs, so about 6.5 h for a 62 M-pair sample, and it held up STAR on a shared node.
 
 ## Done when
 `results/samples/<id>/fastp/` and `results/multiqc/multiqc_report.html` exist on the test profile.
