@@ -66,7 +66,7 @@ workflow {
         .mix(CAT_FASTQ.out.reads)
 
     // QC and trimming (phase 03)
-    if (params.umi_loc && !params.umi_len) error "--umi_loc needs --umi_len"
+    if (params.umi_loc && params.umi_loc != 'header' && !params.umi_len) error "--umi_loc needs --umi_len"
 
     FASTQC(ch_reads)
     FASTP(ch_reads)
