@@ -19,7 +19,7 @@ All reference paths come from config, keyed by `--genome`; nothing hard-coded in
 `<key>` = genome name + 8-character fingerprint of the FASTA location, so a different FASTA never reuses another FASTA's STAR index.
 
 ## Contig names
-`bin/match_chroms` renames repeat and known-site BEDs to the FASTA's contigs (from its `.fai`): `chr1` <-> `1`, `chrM` <-> `MT`, `chr1_KI270706v1_random` -> `KI270706.1`; rows on contigs the FASTA lacks (UCSC `_alt`/`_fix`) are dropped with a count on stderr. For REDIportal it runs after liftOver (UCSC chains use `chr`). dbSNP VCFs are not renamed: use one with the FASTA's naming (randy: dbSNP 151 common, Ensembl names).
+`bin/match_chroms` renames repeat and known-site BEDs to the FASTA's contigs (from its `.fai`): `chr1` <-> `1`, `chrM` <-> `MT`, `chr1_KI270706v1_random` -> `KI270706.1`; rows on contigs the FASTA lacks (UCSC `_alt`/`_fix`) are dropped with a count on stderr. For REDIportal it runs after liftOver (UCSC chains use `chr`). dbSNP VCFs are not renamed: use one with the FASTA's naming (e.g. dbSNP 151 common, Ensembl names).
 
 ## Read length and STAR indexes
 STAR fixes `sjdbOverhang` when the index is built and refuses a different value at mapping, even with `--sjdbGTFfile` passed again (checked 2026-10-29 on the test slice). So `star_index` takes one dir or several (list, or comma-separated on the command line), e.g. a 100 bp and a 150 bp build; the one whose `genomeParameters.txt` matches `--read_length - 1` is used. No match: a warning, and one is built into `--ref_cache`. Index build and alignment share the nf-core community image `htslib_samtools_star_gawk` (STAR 2.7.11b).
@@ -43,5 +43,5 @@ Suggested public sources if you have no local copies (checked 2026-10-20): GENCO
 ## Shipped / verified
 - `-profile test,docker` and `-profile test,apptainer` pass; a fresh run without `-resume` skips `PREP_FASTA` and `STAR_GENOMEGENERATE` ("Stored").
 - Real mouse inputs through `PREP_KNOWN_SITES` (liftOver) and `PREP_REPEATS` (929,102 Alu/B2 intervals) on the test profile.
-- randy GRCh38 (Ensembl 110), `--read_length 100`: prebuilt STAR index used; REDIportal hg38 v3 -> 15,678,583 / 15,680,832 sites on Ensembl names (2,249 on alt contigs dropped); 1,113,103 Alu intervals.
-- randy GRCm39 + REDIportal mm10 via liftOver: 107,094 / 107,094 sites, Ensembl names incl. GL/JH scaffolds.
+- Local GRCh38 (Ensembl 110), `--read_length 100`: prebuilt STAR index used; REDIportal hg38 v3 -> 15,678,583 / 15,680,832 sites on Ensembl names (2,249 on alt contigs dropped); 1,113,103 Alu intervals.
+- Local GRCm39 (Ensembl 110) + REDIportal mm10 via liftOver: 107,094 / 107,094 sites, Ensembl names incl. GL/JH scaffolds.
