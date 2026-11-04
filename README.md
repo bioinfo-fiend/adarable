@@ -24,7 +24,7 @@ flowchart TD
     subgraph qc ["03 · QC + trim"]
         fastqc["FastQC"]
         fastp["fastp<br/>adapters, quality, optional UMI"]
-        ribo["RiboDetector<br/>% rRNA, optional removal"]
+        ribo["SortMeRNA<br/>% rRNA, optional removal"]
     end
     cat --> fastqc
     cat --> fastp --> ribo
@@ -131,12 +131,22 @@ brain_1,data/brain_1_R1.fastq.gz,,reverse
 
 ```
 results/
-├── pipeline_info/   params, software versions, execution report, timeline, trace, DAG
-├── samples/<id>/    trimmed-read QC, BAMs, strandedness, REDItools calls, annotated sites, editing index
-├── cohort/          editing_index.tsv, sites_matrix.tsv.gz
 ├── multiqc/         multiqc_report.html
+├── fastp/           trimming reports, all samples
+├── bam/             deduplicated BAMs + index
+├── fastqc/          raw-read FastQC reports
+├── stats/           sequencing_stats.tsv (one row per sample) + STAR, samtools, dedup, rRNA, strandedness
+├── junctions/       STAR splice junctions
+├── bigwig/          strand-specific coverage tracks
+├── reditools/       REDItools calls          (phase 05)
+├── sites/           annotated editing sites  (phase 06)
+├── editing_index/   per-sample editing index (phase 07)
+├── cohort/          editing_index.tsv, sites_matrix.tsv.gz
+├── pipeline_info/   params, software versions, execution report, timeline, trace, DAG
 └── dashboard.html   interactive summary, opens offline
 ```
+
+Intermediates (trimmed FASTQs, pre-dedup BAMs) stay in the Nextflow work dir only.
 
 Provenance (parameters, tool versions, logs) is written next to the results, so every run can be traced.
 
@@ -147,7 +157,7 @@ Provenance (parameters, tool versions, logs) is written next to the results, so 
 | [00](docs/phases/00-overview.md) | Overview, samplesheet contract, design decisions | ✅ done |
 | [01](docs/phases/01-skeleton.md) | Skeleton: config, profiles, samplesheet check, FASTQ merge, provenance | ✅ done |
 | [02](docs/phases/02-references.md) | References for GRCh38 and GRCm39, STAR index, test slice | ✅ done |
-| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, RiboDetector, MultiQC | ✅ done |
+| [03](docs/phases/03-qc-trim.md) | FastQC, fastp, SortMeRNA, MultiQC | ✅ done |
 | [04](docs/phases/04-align-dedup.md) | STAR 2-pass, duplicates (samtools / umi_tools), strandedness, bigWigs | ✅ done |
 | [05](docs/phases/05-editing-detection.md) | REDItools3 site detection | 🚧 next |
 | [06](docs/phases/06-annotation.md) | Annotation against REDIportal, dbSNP, repeats | ⏳ planned |
@@ -167,7 +177,7 @@ Provenance (parameters, tool versions, logs) is written next to the results, so 
 [REDItools](https://github.com/BioinfoUNIBA/REDItools3) ·
 [STAR](https://github.com/alexdobin/STAR) ·
 [fastp](https://github.com/OpenGene/fastp) ·
-[RiboDetector](https://github.com/hzi-bifo/RiboDetector) ·
+[SortMeRNA](https://github.com/sortmerna/sortmerna) ·
 [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) ·
 [UMI-tools](https://github.com/CGATOxford/UMI-tools) ·
 [deepTools](https://deeptools.readthedocs.io/) ·

@@ -19,8 +19,8 @@ process FASTP {
         : "--in1 ${names[0]} --in2 ${names[1]} --out1 ${meta.id}_1.trim.fastq.gz --out2 ${meta.id}_2.trim.fastq.gz --detect_adapter_for_pe"
     // Adapters are auto-detected; --adapter_fasta adds known ones (e.g. MGI/DNBSEQ)
     def adapters = params.adapter_fasta ? "--adapter_fasta ${params.adapter_fasta}" : ''
-    // UMI moved into the read name (:UMI_xxx) for UMI-aware dedup in phase 04
-    def umi = params.umi_loc ? "--umi --umi_loc ${params.umi_loc} --umi_len ${params.umi_len}" : ''
+    // UMI moved into the read name (:UMI_xxx) for UMI-aware dedup in phase 04; 'header' = already there
+    def umi = params.umi_loc && params.umi_loc != 'header' ? "--umi --umi_loc ${params.umi_loc} --umi_len ${params.umi_len}" : ''
     // Low-quality ends trimmed: end mismatches would look like editing
     """
     ${links}

@@ -22,6 +22,7 @@ process STAR_ALIGN {
         --outFileNamePrefix ${meta.id}. \\
         --twopassMode Basic \\
         --outSAMtype BAM SortedByCoordinate \\
+        --limitBAMsortRAM ${task.memory.toBytes().intdiv(2)} \\
         --outSAMattributes NH HI AS nM NM MD \\
         --outFilterMultimapNmax 1 \\
         --alignEndsType EndToEnd
