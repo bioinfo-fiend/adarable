@@ -28,7 +28,7 @@ CSV, header required:
 |---|---|---|
 | 01 | [01-skeleton.md](01-skeleton.md) | `main.nf`, config, profiles, samplesheet check, FASTQ merge, provenance |
 | 02 | [02-references.md](02-references.md) | `conf/genomes.config` (GRCh38, GRCm39), STAR index, test slice |
-| 03 | [03-qc-trim.md](03-qc-trim.md) | FastQC, fastp, RiboDetector, MultiQC |
+| 03 | [03-qc-trim.md](03-qc-trim.md) | FastQC, fastp, SortMeRNA, MultiQC |
 | 04 | [04-align-dedup.md](04-align-dedup.md) | STAR 2-pass, duplicates, strandedness inference, bigWigs |
 | 05 | [05-editing-detection.md](05-editing-detection.md) | REDItools3, detector swap contract |
 | 06 | [06-annotation.md](06-annotation.md) | known/SNP/Alu/gene annotation, A>G filtering |
@@ -49,7 +49,7 @@ Every phase ends runnable on `-profile test,docker`.
 | SAMtools sort/index/stats | **kept** |
 | Picard MarkDuplicates | **replaced** by samtools markdup: already in the STAR image, no Java |
 | MultiQC | **kept** |
-| SortMeRNA | **replaced** by RiboDetector: no rRNA database, faster; % rRNA always reported, removal with `--remove_rrna` (phase 03) |
+| SortMeRNA | **kept**, settings checked against bbduk; % rRNA on a 2 M-pair subsample, whole library only with `--remove_rrna` (phase 03) |
 | BBSplit | skipped: add if contamination shows up in QC |
 | Salmon, RSEM, Kallisto, StringTie, DESeq2 | skipped: quantification, not editing; add for ADAR expression covariates |
 | HISAT2 route | skipped: one aligner |

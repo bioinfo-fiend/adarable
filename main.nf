@@ -10,7 +10,8 @@ include { PREP_KNOWN_SITES    } from './modules/local/prep_known_sites'
 include { FASTQC              } from './modules/local/fastqc'
 include { FASTP               } from './modules/local/fastp'
 include { MULTIQC             } from './modules/local/multiqc'
-include { RIBODETECTOR        } from './modules/local/ribodetector'
+include { PREP_SORTMERNA_INDEX } from './modules/local/prep_sortmerna_index'
+include { SORTMERNA            } from './modules/local/sortmerna'
 include { PREP_GENE_BED       } from './modules/local/prep_gene_bed'
 include { STAR_ALIGN          } from './modules/local/star_align'
 include { SAMTOOLS_MARKDUP    } from './modules/local/samtools_markdup'
@@ -66,7 +67,7 @@ workflow {
         .mix(CAT_FASTQ.out.reads)
 
     // QC and trimming (phase 03)
-    if (params.umi_loc && !params.umi_len) error "--umi_loc needs --umi_len"
+    if (params.umi_loc && params.umi_loc != 'header' && !params.umi_len) error "--umi_loc needs --umi_len"
 
     FASTQC(ch_reads)
     FASTP(ch_reads)
@@ -76,11 +77,15 @@ workflow {
     ch_multiqc = FASTQC.out.zip.map { _meta, zip -> zip }
         .mix(FASTP.out.json.map { _meta, json -> json })
 
-    if (!params.skip_ribodetector) {
-        RIBODETECTOR(ch_trimmed)
-        if (params.remove_rrna) ch_trimmed = RIBODETECTOR.out.reads
-        ch_multiqc  = ch_multiqc.mix(RIBODETECTOR.out.mqc)
-        ch_versions = ch_versions.mix(RIBODETECTOR.out.versions)
+    if (params.remove_rrna && !params.rrna_db) error "--remove_rrna needs --rrna_db"
+    if (!params.rrna_db) log.warn "No --rrna_db: rRNA check skipped (set it in conf/local.config, see conf/local.example.config)"
+    if (params.rrna_db && !params.skip_rrna_check) {
+        def rrna_db = file(params.rrna_db, checkIfExists: true)
+        PREP_SORTMERNA_INDEX(rrna_db)
+        SORTMERNA(ch_trimmed, rrna_db, PREP_SORTMERNA_INDEX.out.index)
+        if (params.remove_rrna) ch_trimmed = SORTMERNA.out.reads
+        ch_multiqc  = ch_multiqc.mix(SORTMERNA.out.mqc)
+        ch_versions = ch_versions.mix(PREP_SORTMERNA_INDEX.out.versions, SORTMERNA.out.versions)
     }
 
     // References (phase 02): prepared once, cached in --ref_cache
