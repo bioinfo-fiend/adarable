@@ -12,3 +12,5 @@ The original 4,159 pairs are split in two halves so the samplesheet can list one
 | `rnavar_run2_R{1,2}.fastq.gz` | remaining 2,080 pairs |
 
 `rnavar_se` reuses `rnavar_run1_R1` as a single-end sample.
+
+`rnavar_run1_R1.fastq.gz` carries spike-in A-to-I edits at 19 sites (phase 05): `spikes.tsv` lists them with their levels, made by `bin/spike_edits.py` from the original file. The originals are in nf-core/test-datasets.
