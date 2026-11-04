@@ -20,7 +20,7 @@ GATK BQSR uses known variant sites to model base-quality error. On RNA, real A>G
 - Strand call: read 1 on the gene strand in >= 80% of informative reads = `forward`, the reverse >= 80% = `reverse`, else `unstranded`.
 - deepTools `--filterRNAstrand` assumes dUTP (reverse) libraries; the labels are swapped for forward-stranded ones so `plus`/`minus` always mean gene strand.
 - UMI guard: `UMITOOLS_DEDUP` stops if read names carry no UMI. STAR cuts names at `/`, so SRA-style `read/1:UMI` names lose it; Illumina names (`read 1:N:0`) keep it.
-- Published: `samples/<id>/star/` (Log.final.out, SJ.out.tab), `dedup/` (BAM, BAI, stats, flagstat, markdup stats or umi_tools log), `bigwig/`, `strand.txt`, `<id>.infer_experiment.txt`.
+- Published: `bam/` (dedup BAM + BAI), `stats/star/` (Log.final.out), `stats/samtools/` (stats, flagstat), `stats/dedup/` (markdup stats or umi_tools log); `samples/<id>/` gets `SJ.out.tab`, `bigwig/`, `strand.txt`, `<id>.infer_experiment.txt`.
 - Verified on `-profile test,docker`: both test samples infer `forward` (0.98 PE, 0.99 SE); MultiQC has STAR, samtools and RSeQC sections. UMI run on the test reads renamed Illumina-style: 251 -> 200 pairs, umi_tools section in MultiQC.
 - Test data note: `rnavar_pe` maps 11% uniquely end-to-end (69% with `--alignEndsType Local`) because R2 of this dataset is noisy (5.7% mismatches per base on its own). EndToEnd stays: real libraries sit well under 1%.
 
