@@ -1,7 +1,7 @@
 # 07 — Editing index and cohort tables
 
 ## Delivers
-- `bin/editing_index.py` → `samples/<id>/editing_index.tsv`:
+- `bin/editing_index.py` → `editing_index/<id>.editing_index.tsv`:
   - **Alu Editing Index (AEI)** = ΣG / Σ(A+G) over all A positions inside Alu (mouse: SINE B1/B2) with coverage ≥ N. Computed from REDItools output restricted to the repeat BED, not from called sites, so it is not biased by site-calling thresholds.
   - counts: sites total, known, novel, in Alu, non-Alu; median edit level.
 - `bin/cohort_table.py` → `cohort/editing_index.tsv` (one row per sample) and `cohort/sites_matrix.tsv.gz` (site × sample edit levels, NA where uncovered).

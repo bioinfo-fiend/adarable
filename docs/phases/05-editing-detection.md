@@ -3,7 +3,7 @@
 ## Delivers
 - `REDITOOLS` process: REDItools3 (PyPI package `reditools3`, latest 3.7 as of 2026-10; pin exact version; container via Wave from `conda`/`pip`, fallback `containers/reditools/Dockerfile`).
   `reditools analyze <bam> --reference <fasta> --strand <0|1|2> --min-base-quality 25 --min-read-quality 20 ...` with optional `--bed-file` to restrict to known sites (fast mode).
-- Output: `results/samples/<id>/reditools/<id>.reditools.tsv.gz`.
+- Output: `results/reditools/<id>.reditools.tsv.gz`.
 - Parallelism: split by chromosome (scatter over `fasta.fai` contigs, gather with `cat`) when genome-wide.
 
 ## Detector swap contract
