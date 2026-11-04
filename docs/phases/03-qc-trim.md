@@ -25,4 +25,4 @@
 - RiboDetector was tried first and dropped. On a 20-sample human cohort it classified about 2,600 pairs/s on 8 CPUs (about 6.5 h per 62 M-pair sample), and `-e rrna` (both mates must be rRNA) reads lower than bbduk.
 
 ## Done when
-`results/samples/<id>/fastp/` and `results/multiqc/multiqc_report.html` exist on the test profile.
+`results/fastp/` and `results/multiqc/multiqc_report.html` exist on the test profile.

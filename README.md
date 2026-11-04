@@ -131,12 +131,17 @@ brain_1,data/brain_1_R1.fastq.gz,,reverse
 
 ```
 results/
-├── pipeline_info/   params, software versions, execution report, timeline, trace, DAG
-├── samples/<id>/    trimmed-read QC, BAMs, strandedness, REDItools calls, annotated sites, editing index
-├── cohort/          editing_index.tsv, sites_matrix.tsv.gz
 ├── multiqc/         multiqc_report.html
+├── fastp/           trimming reports, all samples
+├── bam/             deduplicated BAMs + index
+├── stats/           sequencing_stats.tsv (one row per sample) + STAR, samtools, dedup, rRNA logs
+├── cohort/          editing_index.tsv, sites_matrix.tsv.gz
+├── samples/<id>/    the rest: FastQC, bigWigs, splice junctions, strandedness, REDItools calls, editing index
+├── pipeline_info/   params, software versions, execution report, timeline, trace, DAG
 └── dashboard.html   interactive summary, opens offline
 ```
+
+Intermediates (trimmed FASTQs, pre-dedup BAMs) stay in the Nextflow work dir only.
 
 Provenance (parameters, tool versions, logs) is written next to the results, so every run can be traced.
 

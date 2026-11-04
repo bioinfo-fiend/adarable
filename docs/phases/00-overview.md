@@ -60,12 +60,16 @@ Every phase ends runnable on `-profile test,docker`.
 ## results/ layout
 ```
 results/
-  pipeline_info/   params.json, software_versions.yml, execution_report.html, timeline.html, trace.txt, dag.html
-  samples/<id>/    fastqc/, fastp/, star/, dedup/, bigwig/, strand.txt, reditools/, annotated_sites.tsv.gz, editing_index.tsv
+  multiqc/         multiqc_report.html + data
+  fastp/           <id>.fastp.{html,json}, all samples together
+  bam/             <id>.dedup.bam(.bai), the BAMs editing is called on
+  stats/           sequencing_stats.tsv (one row per sample, MultiQC general stats), star/, samtools/, dedup/, sortmerna/
   cohort/          editing_index.tsv, sites_matrix.tsv.gz
-  multiqc/         multiqc_report.html
+  samples/<id>/    the rest: fastqc/, bigwig/, SJ.out.tab, strand.txt, infer_experiment.txt, reditools/, annotated_sites.tsv.gz, editing_index.tsv
+  pipeline_info/   params.json, software_versions.yml, execution_report.html, timeline.html, trace.txt, dag.html
   dashboard.html
 ```
+Everything else (trimmed FASTQs, undeduplicated STAR BAMs) stays in the Nextflow work dir and is not published; clean it with `nextflow clean` once a run is final.
 
 ## License
 [PolyForm Noncommercial 1.0.0](../../LICENSE.md): free for research, teaching, personal and other noncommercial use; commercial use is not permitted. This covers ADARable's own code only. Tools pulled in containers (STAR, REDItools, fastp, Picard, …) and reference data (REDIportal, dbSNP, GENCODE) keep their own licenses and terms.
