@@ -1,7 +1,7 @@
 # 06 — Annotation and site filtering
 
 ## Delivers
-`bin/annotate_sites.py` (stdlib + pysam for tabix lookups) → `annotated_sites.tsv.gz` with added columns:
+`bin/annotate_sites.py` (stdlib + pysam for tabix lookups) → `sites/<id>.annotated_sites.tsv.gz` with added columns:
 - `known_rediportal` (bool), `dbsnp` (rsID or empty), `repeat` (Alu/SINE family or empty), `gene`, `region` (exon/intron/UTR/intergenic from GTF), `edit_level` = G/(A+G) on the transcribed strand.
 
 Filters (params, defaults):

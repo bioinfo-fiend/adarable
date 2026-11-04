@@ -63,9 +63,14 @@ results/
   multiqc/         multiqc_report.html + data
   fastp/           <id>.fastp.{html,json}, all samples together
   bam/             <id>.dedup.bam(.bai), the BAMs editing is called on
-  stats/           sequencing_stats.tsv (one row per sample, MultiQC general stats), star/, samtools/, dedup/, sortmerna/
+  fastqc/          <id>_fastqc.{html,zip}
+  stats/           sequencing_stats.tsv (one row per sample, MultiQC general stats), star/, samtools/, dedup/, sortmerna/, strandedness/
+  junctions/       <id>.SJ.out.tab (STAR splice junctions)
+  bigwig/          <id>.{plus,minus}.bw
+  reditools/       <id>.reditools.tsv.gz
+  sites/           <id>.annotated_sites.tsv.gz
+  editing_index/   <id>.editing_index.tsv
   cohort/          editing_index.tsv, sites_matrix.tsv.gz
-  samples/<id>/    the rest: fastqc/, bigwig/, SJ.out.tab, strand.txt, infer_experiment.txt, reditools/, annotated_sites.tsv.gz, editing_index.tsv
   pipeline_info/   params.json, software_versions.yml, execution_report.html, timeline.html, trace.txt, dag.html
   dashboard.html
 ```
