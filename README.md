@@ -79,8 +79,8 @@ flowchart TD
     classDef done fill:#23aa62,stroke:#1b8a4f,color:#fff
     classDef todo fill:#24365c,stroke:#3d5a80,color:#fdf0d5
     classDef data fill:#ffd166,stroke:#e0b040,color:#11192e
-    class check,cat,index,fastqc,fastp,ribo,mqc,star,markdup,strand,bigwig done
-    class redi,ann,aei,cohort,dash todo
+    class check,cat,index,fastqc,fastp,ribo,mqc,star,markdup,strand,bigwig,redi done
+    class ann,aei,cohort,dash todo
     class sheet,fasta,known data
 ```
 
@@ -138,7 +138,7 @@ results/
 ├── stats/           sequencing_stats.tsv (one row per sample) + STAR, samtools, dedup, rRNA, strandedness
 ├── junctions/       STAR splice junctions
 ├── bigwig/          strand-specific coverage tracks
-├── reditools/       REDItools calls          (phase 05)
+├── reditools/       REDItools site tables
 ├── sites/           annotated editing sites  (phase 06)
 ├── editing_index/   per-sample editing index (phase 07)
 ├── cohort/          editing_index.tsv, sites_matrix.tsv.gz
@@ -159,8 +159,8 @@ Provenance (parameters, tool versions, logs) is written next to the results, so 
 | [02](docs/phases/02-references.md) | References for GRCh38 and GRCm39, STAR index, test slice | ✅ done |
 | [03](docs/phases/03-qc-trim.md) | FastQC, fastp, SortMeRNA, MultiQC | ✅ done |
 | [04](docs/phases/04-align-dedup.md) | STAR 2-pass, duplicates (samtools / umi_tools), strandedness, bigWigs | ✅ done |
-| [05](docs/phases/05-editing-detection.md) | REDItools3 site detection | 🚧 next |
-| [06](docs/phases/06-annotation.md) | Annotation against REDIportal, dbSNP, repeats | ⏳ planned |
+| [05](docs/phases/05-editing-detection.md) | REDItools3 site detection, spike-in truth set | ✅ done |
+| [06](docs/phases/06-annotation.md) | Annotation against REDIportal, dbSNP, repeats | 🚧 next |
 | [07](docs/phases/07-editing-index.md) | Alu Editing Index and cohort tables | ⏳ planned |
 | [08](docs/phases/08-dashboard.md) | Interactive results dashboard | ⏳ planned |
 

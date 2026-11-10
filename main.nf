@@ -19,6 +19,7 @@ include { UMITOOLS_DEDUP      } from './modules/local/umitools_dedup'
 include { SAMTOOLS_STATS      } from './modules/local/samtools_stats'
 include { INFER_STRAND        } from './modules/local/infer_strand'
 include { BAMCOVERAGE         } from './modules/local/bamcoverage'
+include { REDITOOLS           } from './modules/local/reditools'
 
 // --fasta etc. win over the --genome entry (conf/genomes.config, or your -c conf/local.config)
 def ref(String key) {
@@ -174,6 +175,10 @@ workflow {
 
     BAMCOVERAGE(ch_bam)
     ch_versions = ch_versions.mix(BAMCOVERAGE.out.versions)
+
+    // Editing-site detection (phase 05)
+    REDITOOLS(ch_bam)
+    ch_versions = ch_versions.mix(REDITOOLS.out.versions)
 
     MULTIQC(ch_multiqc.flatten().collect())
     ch_versions = ch_versions.mix(MULTIQC.out.versions)
